@@ -1,62 +1,173 @@
 /**
- * 
- * Manipulating the DOM exercise.
- * Exercise programmatically builds navigation,
- * scrolls to anchors from navigation,
+ * DOM Manipulation Exercise
+ * Programmatically builds navigation, scrolls to anchors from navigation, 
  * and highlights section in viewport upon scrolling.
- * 
  * Dependencies: None
- * 
  * JS Version: ES2015/ES6
- * 
  * JS Standard: ESlint
- * 
-*/
-
-/**
- * Comments should be present at the beginning of each procedure and class.
- * Great to have comments before crucial code sections within the procedure.
 */
 
 /**
  * Define Global Variables
- * 
-*/
-
-
-/**
- * End Global Variables
- * Start Helper Functions
- * 
-*/
-
-
+ */
+const navbarList = document.getElementById('navbar__list');
+const sections = document.querySelectorAll('section');
+const scrollToTopButton = document.getElementById('scrollToTop');
+let isScrolling;
 
 /**
- * End Helper Functions
- * Begin Main Functions
- * 
-*/
+ * Build Navigation Menu
+ */
+const buildNavMenu = () => {
+    const fragment = document.createDocumentFragment();
 
-// build the nav
+    sections.forEach(section => {
+        const id = section.getAttribute('id');
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
 
+        link.href = `#${id}`;
+        link.classList.add('nav-link');
+        link.setAttribute('data-link', id);
+        link.textContent = id;
 
-// Add class 'active' to section when near top of viewport
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            scrollToSection(id);
+        });
 
+        listItem.appendChild(link);
+        fragment.appendChild(listItem);
+    });
 
-// Scroll to anchor ID using scrollTO event
-
+    navbarList.appendChild(fragment);
+};
 
 /**
- * End Main Functions
- * Begin Events
- * 
-*/
+ * Scroll to Section
+ */
+const scrollToSection = (id) => {
+    const section = document.getElementById(id);
+    const sectionPosition = section.getBoundingClientRect().top + window.scrollY - 60;
 
-// Build menu 
+    window.scrollTo({
+        top: sectionPosition,
+        behavior: 'smooth'
+    });
+};
 
-// Scroll to section on link click
+/**
+ * Highlight Active Section on Scroll
+ */
+const highlightActiveSection = () => {
+    sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const navItem = document.querySelector(`a[data-link="${section.id}"]`);
+        const h2 = document.querySelector(`h2[name="${section.id}"]`);
 
-// Set sections as active
+        if (rect.top >= 0 && rect.top < window.innerHeight / 2) {
+            navItem.classList.add('active-link');
+            h2.style.color = 'RGB(71, 84, 118)';
+        } else {
+            navItem.classList.remove('active-link');
+            h2.style.color = '';
+        }
+    });
+};
 
+/**
+ * Toggle Scroll to Top Button Visibility
+ */
+const toggleScrollToTopButton = () => {
+    if (window.scrollY > window.innerHeight) {
+        scrollToTopButton.style.display = 'block';
+    } else {
+        scrollToTopButton.style.display = 'none';
+    }
+};
 
+/**
+ * Scroll to Top
+ */
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
+
+/**
+ * Auto Hide Navbar on Scroll
+ */
+const autoHideNavbar = () => {
+    navbarList.style.top = '0';
+    clearTimeout(isScrolling);
+
+    isScrolling = setTimeout(() => {
+        navbarList.style.top = '-50px';
+    }, 1500);
+};
+
+/**
+ * Toggle Navbar Styling on Scroll
+ */
+const toggleNavbarStyle = () => {
+    const navbar = document.querySelector('.navbar');
+    if (window.scrollY > 50) {
+        navbar.classList.add('navbar-scrolled');
+        navbar.classList.remove('static');
+    } else {
+        navbar.classList.remove('navbar-scrolled');
+        navbar.classList.add('static');
+    }
+};
+
+/**
+ * Initialize Page Functions and Events
+ */
+const initializePage = () => {
+    buildNavMenu();
+
+    window.addEventListener('scroll', () => {
+        highlightActiveSection();
+        toggleScrollToTopButton();
+        autoHideNavbar();
+        toggleNavbarStyle();
+    });
+
+    scrollToTopButton.addEventListener('click', scrollToTop);
+};
+
+initializePage();
+
+/**
+ * Slider and Animation (requires jQuery and AOS)
+ */
+$(document).ready(function () {
+    $(".owl-carousel").owlCarousel();
+    AOS.init({ once: true });
+
+    setTimeout(() => {
+        $(".collection-btn").addClass("aos-animate");
+    }, 400);
+
+  
+});
+$('#slider1').owlCarousel({
+    items: 1,
+    loop: true,
+    margin: 10,
+    autoplay: true,
+    autoplayTimeout: 2000,
+    autoplayHoverPause: true,
+    animateOut: 'fadeOut'
+});
+
+$('#brands').owlCarousel({
+    items: 5,
+    loop: true,
+    margin: 10,
+    autoplay: true,
+    autoplayTimeout: 2000,
+    autoplayHoverPause: true
+});
